@@ -35,6 +35,16 @@ info_node make_node(QFile& file){
 
 }
 
+info_node make_node(QMainWindow* window){
+    //open a dialog
+    info_node retVal;
+    info_dialog node_getter(window,&retVal);
+    node_getter.exec();
+
+    return retVal;
+
+}
+
  char peek_char(QFile& file){
     char delimeter;
     file.peek(&delimeter,1);
