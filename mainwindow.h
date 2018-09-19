@@ -9,6 +9,7 @@
 #include <vector>
 #include <QDialog>
 #include <QListWidgetItem>
+#include <QKeyEvent>
 
 
 using std::cout;
@@ -57,6 +58,7 @@ private:
     project_map map;
     void main_buttons_enabled(bool);
     string current_section;
+    void keyPressEvent(QKeyEvent *e);
 
 
 };

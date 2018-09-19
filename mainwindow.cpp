@@ -149,3 +149,9 @@ void MainWindow::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
     load_listwidget(current_section);
 
 }
+
+void MainWindow::keyPressEvent(QKeyEvent *e){
+    if(e->key() == Qt::Key_Backspace){
+        ui->stackedWidget->setCurrentIndex(0);
+    }
+}
