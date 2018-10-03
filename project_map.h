@@ -8,6 +8,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <string>
+#include <QTextStream>
 
 using std::vector;
 using std::shared_ptr;
@@ -30,6 +31,8 @@ public:
     void load_file(QString);
     bool is_loaded();
     void print_map(ostream&);
+    void project_map::print_map(QTextStream&);
+    void write_to_file(QString);
 
 private:
     bool loaded;

@@ -52,6 +52,9 @@ void MainWindow::on_actionOpen_triggered()
 
 void MainWindow::on_actionSave_triggered()
 {
+    QString filename = QFileDialog::getSaveFileName(this,"Save your file","","Text files (*.txt)");
+    map.write_to_file(filename);
+
 
 }
 
@@ -155,3 +158,4 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
         ui->stackedWidget->setCurrentIndex(0);
     }
 }
+
