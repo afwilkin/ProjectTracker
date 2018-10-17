@@ -53,13 +53,18 @@ private slots:
 
     void on_listWidget_itemDoubleClicked(QListWidgetItem *item);
 
+    void on_resolve_clicked();
+
+
+
 private:
     Ui::MainWindow *ui;
     project_map map;
     void main_buttons_enabled(bool);
     string current_section;
     void keyPressEvent(QKeyEvent *e);
-
+    void MainWindow::keyReleaseEvent(QKeyEvent *e);
+    bool ctrl_pressed;
 
 };
 

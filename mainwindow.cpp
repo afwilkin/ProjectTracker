@@ -9,11 +9,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
+    ui->resolve->setVisible(false);
     ui->stackedWidget->setCurrentIndex(0);
     //disable all actions until project file is loaded
     main_buttons_enabled(false);
     current_section = "";
+    ctrl_pressed = false;
 
 }
 
@@ -116,6 +117,14 @@ void MainWindow::load_listwidget(string section){
         ui->listWidget->addItem(QString::fromStdString(node_list[i].title));
     }
 
+    //if need be show the "resolved" button
+    if(section=="TODO" || section=="QUESTIONS"){
+        ui->resolve->setVisible(true);
+    }
+    else{
+        ui->resolve->setVisible(false);
+    }
+
     //go to the next screen
     ui->stackedWidget->setCurrentIndex(1);
 
@@ -136,8 +145,11 @@ void MainWindow::on_delete_2_clicked()
     //get the current item and delete it from the list
     vector<info_node>& node_list = map.sections[current_section];
     int selected_indx = ui->listWidget->currentRow();
-    node_list.erase(node_list.begin() + selected_indx);
-    load_listwidget(current_section);
+    if (selected_indx != -1){
+        node_list.erase(node_list.begin() + selected_indx);
+        load_listwidget(current_section);
+    }
+
 
 
 }
@@ -150,12 +162,98 @@ void MainWindow::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
     edit_dialog.exec();
 
     load_listwidget(current_section);
-
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *e){
+    //backspace
     if(e->key() == Qt::Key_Backspace){
         ui->stackedWidget->setCurrentIndex(0);
     }
+
+    //CTRL
+    if(e->key() == Qt::Key_Control){
+        qDebug() << "CTRL pressed \n";
+        ctrl_pressed = true;
+    }
+
+    //Ctrl + S
+    if(e->key() == Qt::Key_S){
+        qDebug() << "S pressed \n";
+        if(ctrl_pressed){
+            on_actionSave_triggered();
+        }
+    }
+
+    //Ctrl + D
+    if(e->key() == Qt::Key_D){
+        qDebug() << "D pressed \n";
+        if(ctrl_pressed && (current_section == "QUESTIONS" || current_section == "TODO" )){
+            on_resolve_clicked();
+        }
+    }
+
+    //Ctrl + N
+    if(e->key() == Qt::Key_N){
+        qDebug() << "N pressed \n";
+        if(ctrl_pressed){
+            on_actionNew_triggered();
+        }
+    }
+
+    //delete
+    if(e->key() == Qt::Key_Delete){
+        on_delete_2_clicked();
+    }
+
+    //1
+    if(e->key() == Qt::Key_1){
+        qDebug() << "1 pressed \n";
+        on_todo_button_clicked();
+    }
+
+    //2
+    if(e->key() == Qt::Key_2){
+        qDebug() << "2 pressed \n";
+        on_notes_button_clicked();
+    }
+
+    //3
+    if(e->key() == Qt::Key_3){
+        qDebug() << "3 pressed \n";
+        on_questions_button_clicked();
+    }
+
+    //4
+    if(e->key() == Qt::Key_4){
+        qDebug() << "4 pressed \n";
+        on_resources_button_clicked();
+    }
+
 }
 
+void MainWindow::keyReleaseEvent(QKeyEvent *e){
+    if(e->key() == Qt::Key_Control){
+        qDebug() << "CTRL released \n";
+        ctrl_pressed = false;
+    }
+
+}
+
+void MainWindow::on_resolve_clicked()
+{
+    string resolved_section;
+    if( current_section == "TODO"){
+        resolved_section = "DONE";
+    }
+    else{
+        resolved_section = "ANSWERED";
+    }
+
+    //move the item to the other list
+    vector<info_node>& current_node_list = map.sections[current_section];
+    vector<info_node>& resolve_node_list = map.sections[resolved_section];
+    int selected_indx = ui->listWidget->currentRow();
+    resolve_node_list.push_back(*(current_node_list.begin() + selected_indx));
+    current_node_list.erase(current_node_list.begin() + selected_indx);
+    load_listwidget(current_section);
+}
