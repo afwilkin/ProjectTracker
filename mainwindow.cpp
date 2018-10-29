@@ -1,8 +1,11 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDebug>
+#include <QSettings>
+#include <QStandardPaths>
 
-
+void set_dir_path(QString path);
+QString get_dir_path();
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -13,9 +16,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->stackedWidget->setCurrentIndex(0);
     //disable all actions until project file is loaded
     main_buttons_enabled(false);
-    current_section = "";
+    set_current_section("HOME");
     ctrl_pressed = false;
-
+    main_buttons_access = false;
 }
 
 MainWindow::~MainWindow()
@@ -36,8 +39,13 @@ void MainWindow::on_actionNew_triggered()
 void MainWindow::on_actionOpen_triggered()
 {
 
+    //get the last file location
+    QString last_dir = get_dir_path();
+
     //prompt the user for a file
-    QString filename =  QFileDialog::getOpenFileName(this,"Select a file","","Text files (*.txt)");
+    QString filename =  QFileDialog::getOpenFileName(this,"Select a file",last_dir,"Text files (*.txt)");
+
+    set_dir_path(filename);
 
     //call function to load file into our data structure
     map.load_file(filename);
@@ -53,19 +61,11 @@ void MainWindow::on_actionOpen_triggered()
 
 void MainWindow::on_actionSave_triggered()
 {
-    QString filename = QFileDialog::getSaveFileName(this,"Save your file","","Text files (*.txt)");
+    QString last_dir = get_dir_path();
+    QString filename = QFileDialog::getSaveFileName(this,"Save your file",last_dir,"Text files (*.txt)");
+    set_dir_path(filename);
     map.write_to_file(filename);
 
-
-}
-
-void MainWindow::on_actionOverview_triggered()
-{
-
-}
-
-void MainWindow::on_actionCollect_Resources_triggered()
-{
 
 }
 
@@ -76,40 +76,59 @@ void MainWindow::main_buttons_enabled(bool enabled){
     ui->resources_button->setEnabled(enabled);
     ui->todo_button->setEnabled(enabled);
 
+    main_buttons_access = enabled;
+
 }
 
 
 void MainWindow::on_todo_button_clicked()
 {
-    //make sure Listview is clear
-    ui->listWidget->clear();
-    load_listwidget("TODO");
+    if(main_buttons_access){
+        //make sure Listview is clear
+        ui->listWidget->clear();
+        load_listwidget("TODO");
+    }
 
 }
 
 void MainWindow::on_notes_button_clicked()
 {
+    if(main_buttons_access){
+        //make sure Listview is clear
+        ui->listWidget->clear();
+        load_listwidget("NOTES");
+    }
+
+}
+
+void MainWindow::on_home_button_clicked()
+{
     //make sure Listview is clear
+    set_current_section("HOME");
     ui->listWidget->clear();
-    load_listwidget("NOTES");
+    ui->stackedWidget->setCurrentIndex(0);
 
 }
 
 void MainWindow::on_questions_button_clicked()
 {
-    ui->listWidget->clear();
-    load_listwidget("QUESTIONS");
+    if(main_buttons_access){
+        ui->listWidget->clear();
+        load_listwidget("QUESTIONS");
+    }
 }
 
 void MainWindow::on_resources_button_clicked()
 {
-    ui->listWidget->clear();
-    load_listwidget("RESOURCES");
+    if(main_buttons_access){
+        ui->listWidget->clear();
+        load_listwidget("RESOURCES");
+    }
 }
 
 void MainWindow::load_listwidget(string section){
 
-    current_section = section;
+    set_current_section(section);
     vector<info_node>& node_list = map.sections[current_section];
     ui->listWidget->clear();
 
@@ -149,9 +168,6 @@ void MainWindow::on_delete_2_clicked()
         node_list.erase(node_list.begin() + selected_indx);
         load_listwidget(current_section);
     }
-
-
-
 }
 
 void MainWindow::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
@@ -167,26 +183,23 @@ void MainWindow::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
 void MainWindow::keyPressEvent(QKeyEvent *e){
     //backspace
     if(e->key() == Qt::Key_Backspace){
-        ui->stackedWidget->setCurrentIndex(0);
+        on_home_button_clicked();
     }
 
     //CTRL
     if(e->key() == Qt::Key_Control){
-        qDebug() << "CTRL pressed \n";
         ctrl_pressed = true;
     }
 
     //Ctrl + S
     if(e->key() == Qt::Key_S){
-        qDebug() << "S pressed \n";
         if(ctrl_pressed){
             on_actionSave_triggered();
         }
     }
 
-    //Ctrl + D
-    if(e->key() == Qt::Key_D){
-        qDebug() << "D pressed \n";
+    //Ctrl + R
+    if(e->key() == Qt::Key_R){
         if(ctrl_pressed && (current_section == "QUESTIONS" || current_section == "TODO" )){
             on_resolve_clicked();
         }
@@ -194,9 +207,13 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
 
     //Ctrl + N
     if(e->key() == Qt::Key_N){
-        qDebug() << "N pressed \n";
         if(ctrl_pressed){
-            on_actionNew_triggered();
+            if(current_section == "HOME"){
+                on_actionNew_triggered();
+            }
+            else{
+                on_add_clicked();
+            }
         }
     }
 
@@ -207,25 +224,21 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
 
     //1
     if(e->key() == Qt::Key_1){
-        qDebug() << "1 pressed \n";
         on_todo_button_clicked();
     }
 
     //2
     if(e->key() == Qt::Key_2){
-        qDebug() << "2 pressed \n";
         on_notes_button_clicked();
     }
 
     //3
     if(e->key() == Qt::Key_3){
-        qDebug() << "3 pressed \n";
         on_questions_button_clicked();
     }
 
     //4
     if(e->key() == Qt::Key_4){
-        qDebug() << "4 pressed \n";
         on_resources_button_clicked();
     }
 
@@ -233,7 +246,6 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
 
 void MainWindow::keyReleaseEvent(QKeyEvent *e){
     if(e->key() == Qt::Key_Control){
-        qDebug() << "CTRL released \n";
         ctrl_pressed = false;
     }
 
@@ -256,4 +268,29 @@ void MainWindow::on_resolve_clicked()
     resolve_node_list.push_back(*(current_node_list.begin() + selected_indx));
     current_node_list.erase(current_node_list.begin() + selected_indx);
     load_listwidget(current_section);
+}
+
+void set_dir_path(QString path){
+    //create the settings object
+    if(path == ""){
+        return;
+    }
+    path = path.left(path.lastIndexOf("/"));
+    QSettings settings("WilkinsAF", "Project Tracker");
+    settings.setValue("global_path",path);
+}
+
+QString get_dir_path(){
+    //create the settings object
+    QSettings settings("WilkinsAF", "Project Tracker");
+    QString retVal(settings.value("global_path","").toString());
+    if(retVal == ""){
+        retVal = QDir::homePath();
+    }
+    return retVal;
+}
+
+void MainWindow::set_current_section(string section){
+    setWindowTitle(QString::fromStdString(section));
+    current_section = section;
 }

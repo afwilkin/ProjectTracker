@@ -19,10 +19,13 @@ public:
 
 private slots:
     void on_buttonBox_accepted();
+    void keyPressEvent(QKeyEvent *e);
+    void keyReleaseEvent(QKeyEvent *e);
 
 private:
     Ui::info_dialog *ui;
     info_node* node_ptr;
+    bool ctrl_pressed;
 };
 
 #endif // INFO_DIALOG_H

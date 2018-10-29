@@ -33,10 +33,6 @@ private slots:
 
     void on_actionSave_triggered();
 
-    void on_actionOverview_triggered();
-
-    void on_actionCollect_Resources_triggered();
-
     void on_todo_button_clicked();
 
     void on_notes_button_clicked();
@@ -55,16 +51,24 @@ private slots:
 
     void on_resolve_clicked();
 
+    void on_home_button_clicked();
+
+
+
 
 
 private:
     Ui::MainWindow *ui;
     project_map map;
     void main_buttons_enabled(bool);
+    bool main_buttons_access;
     string current_section;
     void keyPressEvent(QKeyEvent *e);
     void MainWindow::keyReleaseEvent(QKeyEvent *e);
     bool ctrl_pressed;
+    QString global_dir;
+    void set_current_section(string section);
+
 
 };
 
