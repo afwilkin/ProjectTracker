@@ -32,16 +32,13 @@ void info_dialog::keyPressEvent(QKeyEvent *e){
 
     //if there is a ctrl+ enter we want to save
     if(e->key() == Qt::Key_Control){
-        qDebug() << "xontrol \n";
         ctrl_pressed = true;
     }
     else if(e->key() == Qt::Key_Alt && ctrl_pressed){
-        qDebug() << "saving \n";
         on_buttonBox_accepted();
         accept();
     }
     else if(e->key() == Qt::Key_Escape ){
-        qDebug() << "exiting \n";
         done(QDialog::Rejected);
     }
 }

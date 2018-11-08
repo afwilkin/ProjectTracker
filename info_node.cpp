@@ -19,14 +19,14 @@ info_node make_node(QFile& file){
 
     //Keep grabbing until we reach the next '-' or a /t that is the main section
     string main_info="";
-    string title = file.readLine();
+    string title = string(file.readLine());
 
     //while the next character is a /t read the line and store in the main_info section
     char delimeter = peek_char(file);
 
     //read the main info
     while(delimeter == '\t'){
-        main_info += file.readLine();
+        main_info.append(file.readLine());
         delimeter = peek_char(file);
     }
 

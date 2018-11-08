@@ -19,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent) :
     set_current_section("HOME");
     ctrl_pressed = false;
     main_buttons_access = false;
+
+
 }
 
 MainWindow::~MainWindow()
@@ -153,8 +155,11 @@ void MainWindow::on_add_clicked()
 {
     //call make_node with "this" parameter
     info_node node_new = make_node(this);
-    map.sections[current_section].push_back(node_new);
-    load_listwidget(current_section);
+
+    if(node_new.title != ""){
+        map.sections[current_section].push_back(node_new);
+        load_listwidget(current_section);
+    }
 
 }
 
